@@ -7,10 +7,46 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-
 #define PORT 8080
 #define BUFFER_LEN 1024     
 
+void server_file(int client_id, const char* filepath)
+{
+    int file = open(filepath, O_RDONLY);
+    if(file == 1)
+    {
+        char error_response[] = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n<html><body><h1>404 Not Found</h1></body></html>";
+        write(client_id, error_response, sizeof(error_response) - 1);
+    }else
+    {
+        // Detectando o tipo de arquivo para definir o Content-Type
+        const char* content_type = "text/html"; // Default
+        if (strstr(filepath, ".css")) {
+            content_type = "text/css";
+        } else if (strstr(filepath, ".js")) {
+            content_type = "application/javascript";
+        } else if (strstr(filepath, ".jpg") || strstr(filepath, ".jpeg")) {
+            content_type = "image/jpeg";
+        } else if (strstr(filepath, ".png")) {
+            content_type = "image/png";
+        }
+
+        // Enviando os cabeçalhos HTTP
+        write(client_id, "HTTP/1.1 200 OK\r\n", 17);
+        char header[256];
+        snprintf(header, sizeof(header), "Content-Type: %s\r\n\r\n", content_type);
+        write(client_fd, header, strlen(header));
+
+        // Enviar conteúdo do arquivo
+        char file_buffer[BUFFER_LEN];
+        int bytes_read;
+        while((bytes_read = read(file, file_buffer, sizeof(file_buffer))) > 0)
+        {
+            write(client_id, file_buffer, bytes_read);
+        }
+        close(file);
+    }
+}
 int main()
 {
     int server_fd, client_fd;
