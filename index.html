@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Server com C</title>
+</head>
+<body>
+    <h1>Web Server em C</h1>
+    <button onclick="shutdownServer()">Desligar Servidor</button>
+
+    <script>
+        function shutdownServer() {
+            fetch('/shutdown', { method: 'POST' })
+                .then(response => alert('Servidor desligando...'))
+                .catch(error => console.error('Erro ao desligar:', error));
+        }
+    </script>
+</body>
+</html>
